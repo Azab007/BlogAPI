@@ -5,10 +5,11 @@ from post.permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly, IsReaderOrRe
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Post, Comment
-from .serializers import CommentSerializer, PostSerializer
+from .serializers import CommentSerializer, PostIdSerializer, PostSerializer
 import django_filters.rest_framework
 from .models import Category
 from django.utils.translation import activate
+from drf_yasg.utils import swagger_auto_schema
 
 from rest_framework.response import Response
 from rest_framework.decorators import action 
@@ -41,11 +42,13 @@ class CommentViewSet(viewsets.ModelViewSet):
         post = get_object_or_404(Post, pk=post_id)
         serializer.save(post=post, author=self.request.user)
 
+
+
 class PostViewSet(viewsets.ModelViewSet):
     activate('ar')
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend,filters.SearchFilter]
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend, filters.SearchFilter]
     filterset_class = PostFilter
     search_fields = ['title', 'content']
     permission_classes = [IsAuthenticated]
@@ -53,10 +56,10 @@ class PostViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             permission_classes = [IsReaderOrReadOnly]
-        elif self.action in ["like",'dislike']:
+        elif self.action in ["like", 'dislike']:
             permission_classes = [IsAuthenticated]
         elif self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAuthenticated,IsAuthorOrReadOnly]
+            permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
         else:
             permission_classes = [IsAdminOrReadOnly]
 
@@ -65,8 +68,9 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
-    def like(self, request, pk=None):
+    @action(detail=True, permission_classes=[IsAuthenticated])
+    @swagger_auto_schema() 
+    def like(self, request, pk=None):        
         post = self.get_object()
         user = request.user
 
@@ -79,7 +83,7 @@ class PostViewSet(viewsets.ModelViewSet):
         post.save()
         return Response({'status': 'success'}, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=True, permission_classes=[IsAuthenticated])
     def dislike(self, request, pk=None):
         post = self.get_object()
         user = request.user

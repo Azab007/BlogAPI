@@ -10,13 +10,13 @@ class Category(models.Model):
         return self.name
 
 class Attachment(models.Model):
-    file = models.FileField(upload_to='attachments/')
+    file = models.FileField(upload_to='attachments/',blank=True)
 
     def __str__(self):
         return self.file.name
 
 class Image(models.Model):
-    image = models.ImageField(upload_to='images/')
+    image = models.ImageField(upload_to='images/',blank=True)
 
     def __str__(self):
         return self.image.name
