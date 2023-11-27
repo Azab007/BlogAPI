@@ -25,6 +25,7 @@ class ImageSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.id', read_only=True)
+    post = serializers.ReadOnlyField(source='post.id', read_only=True)
     class Meta:
         model = Comment
         fields = '__all__'
