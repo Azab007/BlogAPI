@@ -69,7 +69,6 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
     @action(detail=True, permission_classes=[IsAuthenticated])
-    @swagger_auto_schema() 
     def like(self, request, pk=None):        
         post = self.get_object()
         user = request.user

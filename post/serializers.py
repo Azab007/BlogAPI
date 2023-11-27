@@ -37,17 +37,26 @@ class PostSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.id', read_only=True)
     class Meta:
         model = Post
-        exclude = ['likes','dislikes']
+        fields = "__all__"
 
     def create(self, validated_data):
         attachments_data = validated_data.pop('attachments', [])
         images_data = validated_data.pop('images', [])
         categories_data = validated_data.pop('categories', [])
+        likes_data = validated_data.pop('likes', [])
+        dislikes_data = validated_data.pop('dislikes', [])
+
 
         post = Post.objects.create(**validated_data)
         for category_data in categories_data:
             post.categories.add(category_data)
 
+        for like_data in likes_data:
+            post.likes.add(like_data)
+
+        for dislike_data in dislikes_data:
+            post.categories.add(dislike_data)
+        
         for attachment_data in attachments_data:
             if dict(attachment_data) != {}:
                 attachment = Attachment.objects.create(**attachment_data)
